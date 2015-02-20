@@ -25,7 +25,7 @@ class Hipchat extends Controller
                 'url'  => 'http://josephwensley.com',
                 'name' => 'Joseph Wensley',
             ],
-            'key'          => 'com.josephwensley.hipchatbot',
+            'key'          => env('BOT_KEY'),
             'links'        => [
                 'homepage' => \URL::to('/'),
                 'self' => \URL::route('capabilities'),
