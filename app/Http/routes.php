@@ -15,14 +15,13 @@ Route::get('/', 'WelcomeController@index');
 
 Route::get('home', 'HomeController@index');
 
-Route::get('addon/capabilities', 'Hipchat@capabilities');
-
-Route::post('addon/install', 'Hipchat@install');
+Route::get('addon/capabilities', ['as' => 'capabilities', 'uses' => 'Hipchat@capabilities']);
+Route::post('addon/install', ['as' => 'install', 'uses' => 'Hipchat@install']);
 
 Route::post('addon/imgur', 'Hipchat@imgur');
 Route::get('addon/installwebhook', 'Hipchat@installWebhook');
 
 Route::controllers([
-	'auth' => 'Auth\AuthController',
-	'password' => 'Auth\PasswordController',
+    'auth'     => 'Auth\AuthController',
+    'password' => 'Auth\PasswordController',
 ]);

@@ -1,8 +1,10 @@
 <?php
 namespace App\Services;
 
+use App\Installation;
 use App\Room;
 use App\Token;
+use Carbon\Carbon;
 use GorkaLaucirica\HipchatAPIv2Client\API\RoomAPI;
 use GorkaLaucirica\HipchatAPIv2Client\Auth\OAuth2;
 use GorkaLaucirica\HipchatAPIv2Client\Client;
@@ -16,17 +18,22 @@ class HipChat
     {
         $accessToken = $this->getAccessToken($data->oauthId, $data->oauthSecret);
 
+        $expireDate = new Carbon();
+        $expireDate->addSeconds($accessToken['expires_in']);
+
         $token = new Token();
-        $token->access_token = $accessToken;
+        $token->access_token = $accessToken['access_token'];
+        $token->expires = $expireDate;
         $token->save();
 
-        $room = new Room();
-        $room->room_id = $data->roomId;
-        $room->group_id = $data->groupId;
-        $room->token()->associate($token);
-        $room->save();
+        $install = new Installation();
+        $install->oauth_id = $data->oauthId;
+        $install->oauth_secret = $data->oauthSecret;
+        $install->room_id = $data->roomId;
+        $install->token()->associate($token);
+        $install->save();
 
-        $this->createWebhook($room);
+        $this->createWebhook($install);
     }
 
     public function getAccessToken($authId, $authSecret)
@@ -41,16 +48,12 @@ class HipChat
             'auth' => [$authId, $authSecret]
         ]);
 
-        Log::info($response->getBody());
-
-        $json = $response->json();
-
-        return $json['access_token'];
+        return $response->json();
     }
 
-    public function createWebhook(Room $room)
+    public function createWebhook(Installation $install)
     {
-        $token = $room->token;
+        $token = $install->token;
         $accessToken = $token->access_token;
 
         $auth = new OAuth2($accessToken);
@@ -63,31 +66,75 @@ class HipChat
         $webhook->setPattern('^\/joebot');
 
         $roomAPI = new RoomAPI($client);
-        $roomAPI->createWebhook($room->room_id, $webhook);
+        $roomAPI->createWebhook($install->room_id, $webhook);
 
-        Log::info($roomAPI->getAllWebhooks($room->room_id));
+        Log::info($roomAPI->getAllWebhooks($install->room_id));
     }
 
-    public function sendMessage(Room $room)
+    public function dispatch(Installation $install, $hookData)
     {
-        $token = $room->token;
+        $messageParts = explode(' ', trim(str_replace('/joebot', '', $hookData->item->message->message)), 2);
+
+        $command = $messageParts[0];
+        $value = isset($messageParts[1]) ? $messageParts[1] : null;
+
+        Log::info($command);
+        Log::info($value);
+
+        if (empty($command)) {
+            $this->sendMessage($install, 'Some help message');
+            return;
+        }
+
+        switch ($command) {
+            case 'joseph':
+                $this->sendMessage($install, $command . ' is the best');
+                break;
+            case 'bruce':
+            case 'topher':
+            case 'bob':
+            case 'roseanna':
+            case 'rainulf':
+                $this->sendMessage($install, 'so asian');
+                break;
+            case 'guillermo':
+            case 'fernando':
+                $this->sendMessage($install, 'mexican');
+                break;
+            case 'math':
+                $compiler = \Hoa\Compiler\Llk::load(
+                    new \Hoa\File\Read('hoa://Library/Math/Arithmetic.pp')
+                );
+                $visitor = new \Hoa\Math\Visitor\Arithmetic();
+                $ast = $compiler->parse($value);
+                $this->sendMessage($install, (string)$visitor->visit($ast));
+                break;
+            default:
+                $this->sendMessage($install, 'who?');
+                break;
+        }
+    }
+
+    public function sendMessage($install, $messageText)
+    {
+        $this->checkToken($install);
+
+        $token = $install->token;
         $accessToken = $token->access_token;
 
         $auth = new OAuth2($accessToken);
         $client = new Client($auth);
 
         $message = new Message();
-        $message->setMessage('Testing');
+        $message->setMessage($messageText);
 
         $roomAPI = new RoomAPI($client);
-        $roomAPI->sendRoomNotification($room->room_id, $message);
-
-        Log::info($roomAPI->getAllWebhooks($room->room_id));
+        $roomAPI->sendRoomNotification($install->room_id, $message);
     }
 
-    public function listWebhooks(Room $room)
+    public function listWebhooks(Installation $install)
     {
-        $token = $room->token;
+        $token = $install->token;
         $accessToken = $token->access_token;
 
         $auth = new OAuth2($accessToken);
@@ -95,6 +142,25 @@ class HipChat
 
         $roomAPI = new RoomAPI($client);
 
-        return $roomAPI->getAllWebhooks($room->room_id);
+        return $roomAPI->getAllWebhooks($install->room_id);
+    }
+
+    public function checkToken(Installation $install)
+    {
+        $token = $install->token;
+
+        if ($token->expires->lt(Carbon::now())) {
+            \Log::info('Token Expired');
+            $accessToken = $this->getAccessToken($install->oauth_id, $install->oauth_secret);
+
+            $expireDate = new Carbon();
+            $expireDate->addSeconds($accessToken['expires_in']);
+
+            $token->access_token = $accessToken['access_token'];
+            $token->expires = $expireDate;
+            $token->save();
+        } else {
+            \Log::info('Token still good');
+        }
     }
 }

@@ -18,6 +18,7 @@ class CreateOauthTokensTable extends Migration
             $table->increments('id');
             $table->string('service');
             $table->string('access_token');
+            $table->dateTime('expires');
         });
     }
 

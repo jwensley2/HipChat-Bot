@@ -1,6 +1,7 @@
 <?php namespace App\Http\Controllers;
 
 use App\Http\Requests;
+use App\Installation;
 use App\Room;
 use App\Token;
 use Request;
@@ -17,25 +18,29 @@ class Hipchat extends Controller
 
     public function capabilities()
     {
-        $response = [
-            'name'         => 'HipChat Imgur Bot',
-            'description'  => 'Post images to Imgur from HipChat',
+        $capabilities = [
+            'name'         => 'JoeBot',
+            'description'  => 'Does the things',
+            'vendor'       => [
+                'url'  => 'http://josephwensley.com',
+                'name' => 'Joseph Wensley',
+            ],
             'key'          => 'com.josephwensley.hipchatbot',
             'links'        => [
-                'homepage' => 'http://154b882c.ngrok.com/',
-                'self'     => 'http://154b882c.ngrok.com/addon/capabilities',
+                'homepage' => \URL::to('/'),
+                'self' => \URL::route('capabilities'),
             ],
             'capabilities' => [
                 'hipchatApiConsumer' => [
                     'scopes' => ['send_notification', 'admin_room']
                 ],
                 'installable'        => [
-                    'callbackUrl' => 'http://154b882c.ngrok.com/addon/install'
+                    'callbackUrl' => \URL::route('install')
                 ],
             ],
         ];
 
-        return response()->json($response);
+        return response()->json($capabilities);
     }
 
     public function install()
@@ -51,15 +56,20 @@ class Hipchat extends Controller
 
     public function imgur()
     {
-        \Log::info(Request::getContent());
+        $data = json_decode(Request::getContent());
 
-        $this->hipchat->sendMessage(Room::find(3));
+        $install = Installation::whereOauthId($data->oauth_client_id)->first();
 
-        return response('test');
+        if ($install) {
+            $this->hipchat->dispatch($install, $data);
+        } else {
+            \Log::warning('Installation not found');
+            \Log::info(Request::getContent());
+        }
     }
 
     public function installWebhook()
     {
-        $this->hipchat->createWebhook(Room::find(3));
+        $this->hipchat->createWebhook(Installation::find(5));
     }
 }
