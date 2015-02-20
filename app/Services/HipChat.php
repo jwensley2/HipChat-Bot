@@ -62,7 +62,7 @@ class HipChat
         $webhook = new Webhook();
         $webhook->setName('imgur');
         $webhook->setEvent('room_message');
-        $webhook->setUrl('http://154b882c.ngrok.com/addon/imgur');
+        $webhook->setUrl(\URL::to('addon/imgur'));
         $webhook->setPattern('^\/joebot');
 
         $roomAPI = new RoomAPI($client);
