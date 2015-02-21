@@ -8,5 +8,5 @@
 
 <?php foreach ($commands as $command): ?>
     <?= $command->getName() ?> - <?= $command->getDescription() ?>
-    <p>/<?= $botcommand ?> <?= $command->getCommand() ?> [max]</p>
+    <p>/<?= $botcommand ?> <?= $command->getUsage() ?></p>
 <?php endforeach ?>

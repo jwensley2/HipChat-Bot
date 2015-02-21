@@ -61,6 +61,16 @@ class Roll implements CommandInterface
     }
 
     /**
+     * Get the command usage
+     *
+     * @return string
+     */
+    public function getUsage()
+    {
+        return "{$this->getCommand()} [max]";
+    }
+
+    /**
      * Triggers the command
      *
      * @param Client    $client   The API client

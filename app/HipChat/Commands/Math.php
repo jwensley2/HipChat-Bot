@@ -60,6 +60,17 @@ class Math implements CommandInterface
     }
 
     /**
+     * Get the command usage
+     *
+     * @return string
+     */
+    public function getUsage()
+    {
+        return "{$this->getCommand()} expression";
+    }
+
+
+    /**
      * Triggers the command
      *
      * @param Client    $client   The API client

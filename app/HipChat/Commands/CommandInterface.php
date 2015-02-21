@@ -44,6 +44,13 @@ interface CommandInterface
     public function getDescription();
 
     /**
+     * Get the command usage
+     *
+     * @return string
+     */
+    public function getUsage();
+
+    /**
      * Triggers the command
      *
      * @param Client $client   The API client
