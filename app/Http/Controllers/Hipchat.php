@@ -1,9 +1,15 @@
 <?php namespace App\Http\Controllers;
 
+use App\HipChat\Commands\Math;
+use App\HipChat\Commands\Roll as RollCommand;
+use App\HipChat\Dispatcher;
+use App\HipChat\Installer;
 use App\Http\Requests;
 use App\Installation;
-use App\Room;
-use App\Token;
+use Config;
+use GorkaLaucirica\HipchatAPIv2Client\Auth\OAuth2;
+use GorkaLaucirica\HipchatAPIv2Client\Client;
+use Log;
 use Request;
 
 class Hipchat extends Controller
@@ -19,16 +25,16 @@ class Hipchat extends Controller
     public function capabilities()
     {
         $capabilities = [
-            'name'         => 'JoeBot',
-            'description'  => 'Does the things',
+            'name'         => Config::get('hipchat.bot.name'),
+            'description'  => Config::get('hipchat.bot.description'),
             'vendor'       => [
                 'url'  => 'http://josephwensley.com',
                 'name' => 'Joseph Wensley',
             ],
-            'key'          => env('BOT_KEY'),
+            'key'          => Config::get('hipchat.bot.key'),
             'links'        => [
                 'homepage' => \URL::to('/'),
-                'self' => \URL::route('capabilities'),
+                'self'     => \URL::route('capabilities'),
             ],
             'capabilities' => [
                 'hipchatApiConsumer' => [
@@ -47,24 +53,34 @@ class Hipchat extends Controller
     {
         $data = json_decode(Request::getContent());
 
-        \Log::info(Request::getContent());
-
-        $this->hipchat->install($data);
+        $installer = new Installer($data);
+        $installer->install();
 
         return response()->json([]);
     }
 
-    public function imgur()
+    public function command()
     {
         $data = json_decode(Request::getContent());
 
+        /** @var Installation $install */
         $install = Installation::whereOauthId($data->oauth_client_id)->first();
 
+        $this->hipchat->checkToken($install);
+
+        $auth = new OAuth2($install->token->access_token);
+        $api = new Client($auth);
+
+        $dispatcher = new Dispatcher($api);
+
+        $dispatcher->registerCommand(new RollCommand());
+        $dispatcher->registerCommand(new Math());
+
         if ($install) {
-            $this->hipchat->dispatch($install, $data);
+            $dispatcher->dispatch($data);
         } else {
-            \Log::warning('Installation not found');
-            \Log::info(Request::getContent());
+            Log::info('Installation not found');
+            Log::info(Request::getContent());
         }
     }
 
