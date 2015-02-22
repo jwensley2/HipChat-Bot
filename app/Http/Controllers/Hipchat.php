@@ -4,6 +4,7 @@ use App\HipChat\Commands\Math;
 use App\HipChat\Commands\Roll as RollCommand;
 use App\HipChat\Dispatcher;
 use App\HipChat\Installer;
+use App\HipChat\Webhooks\Events\RoomMessage;
 use App\Http\Requests;
 use App\Installation;
 use Config;
@@ -61,26 +62,25 @@ class Hipchat extends Controller
 
     public function command()
     {
-        $data = json_decode(Request::getContent());
+        $event = new RoomMessage(json_decode(Request::getContent()));
 
         /** @var Installation $install */
-        $install = Installation::whereOauthId($data->oauth_client_id)->first();
+        $install = Installation::whereOauthId($event->oAuthClientId)->first();
 
         $this->hipchat->checkToken($install);
 
         $auth = new OAuth2($install->token->access_token);
-        $api = new Client($auth);
+        $client = new Client($auth);
 
-        $dispatcher = new Dispatcher($api);
+        $dispatcher = new Dispatcher($client);
 
-        $dispatcher->registerCommand(new RollCommand());
-        $dispatcher->registerCommand(new Math());
+        $dispatcher->registerCommand(new RollCommand($client));
+        $dispatcher->registerCommand(new Math($client));
 
         if ($install) {
-            $dispatcher->dispatch($data);
+            $dispatcher->dispatch($event);
         } else {
-            Log::info('Installation not found');
-            Log::info(Request::getContent());
+            Log::info("Installation not found || Client ID: {$event->oAuthClientId}");
         }
     }
 

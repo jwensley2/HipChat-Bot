@@ -1,10 +1,17 @@
 <?php
 namespace App\HipChat\Commands;
 
+use App\HipChat\CommandParser;
+use App\HipChat\Webhooks\Events\RoomMessage;
 use GorkaLaucirica\HipchatAPIv2Client\Client;
 
 interface CommandInterface
 {
+
+    /**
+     * @param Client $client The API client
+     */
+    public function __construct(Client $client);
 
     /**
      * Get the command, eg. /bot <command>
@@ -53,8 +60,9 @@ interface CommandInterface
     /**
      * Triggers the command
      *
-     * @param Client $client   The API client
-     * @param \StdClass  $hookData The data passed to the webhook
+     * @param CommandParser $command
+     * @param RoomMessage   $event
+     * @return void
      */
-    public function trigger(Client $client, $hookData);
+    public function trigger(CommandParser $command, RoomMessage $event);
 }

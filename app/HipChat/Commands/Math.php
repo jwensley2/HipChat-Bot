@@ -1,92 +1,30 @@
 <?php
 namespace App\HipChat\Commands;
 
-use GorkaLaucirica\HipchatAPIv2Client\API\RoomAPI;
+use App\HipChat\CommandParser;
+use App\HipChat\Webhooks\Events\RoomMessage;
 use GorkaLaucirica\HipchatAPIv2Client\Client;
-use GorkaLaucirica\HipchatAPIv2Client\Model\Message;
 
-class Math implements CommandInterface
+class Math extends AbstractCommand implements CommandInterface
 {
-    /**
-     * Get the command, eg. /bot <command>
-     *
-     * @return string
-     */
-    public function getCommand()
-    {
-        return 'math';
-    }
-
-    /**
-     * Get an array containing aliases for the command
-     *
-     * @return array
-     */
-    public function getAliases()
-    {
-        return ['calc'];
-    }
-
-    /**
-     * Mark an alias as disabled
-     * Aliases may need to be disabled if multiple commands try to register the same one
-     *
-     * @param $alias
-     * @return mixed
-     */
-    public function disableAlias($alias)
-    {
-        return;
-    }
-
-    /**
-     * Get the name of the command
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return 'Math';
-    }
-
-    /**
-     * Get the command description
-     *
-     * @return string
-     */
-    public function getDescription()
-    {
-        return 'Perform math operations';
-    }
-
-    /**
-     * Get the command usage
-     *
-     * @return string
-     */
-    public function getUsage()
-    {
-        return "{$this->getCommand()} expression";
-    }
-
+    protected $command     = 'math';
+    protected $name        = 'Math';
+    protected $description = 'Perform math operations';
+    protected $usage       = '<expression>';
+    protected $aliases     = ['calc'];
 
     /**
      * Triggers the command
      *
-     * @param Client    $client   The API client
-     * @param \StdClass $hookData The data passed to the webhook
+     * @param CommandParser $command
+     * @param RoomMessage   $event
+     * @return void
      */
-    public function trigger(Client $client, $hookData)
+    public function trigger(CommandParser $command, RoomMessage $event)
     {
-        $botCommand = \Config::get('hipchat.bot.command');
+        $roomId = $event->item->room->id;
 
-        $commands = array_map(function ($alias) use ($botCommand) {
-            return "/{$botCommand} {$alias}";
-        }, $this->getAliases());
-
-        $commands[] = "/{$botCommand} {$this->getCommand()}";
-
-        $value = trim(str_replace($commands, '', $hookData->item->message->message));
+        $value = $command->getMessage();
 
         $compiler = \Hoa\Compiler\Llk::load(
             new \Hoa\File\Read('hoa://Library/Math/Arithmetic.pp')
@@ -94,16 +32,17 @@ class Math implements CommandInterface
 
         $visitor = new \Hoa\Math\Visitor\Arithmetic();
 
-        $message = new Message();
+        if (empty($value)) {
+            $this->sendMessage($roomId, "Usage: {$this->getUsage()}");
+
+            return;
+        }
 
         try {
             $ast = $compiler->parse($value);
-            $message->setMessage("Result: " . (string)$visitor->visit($ast));
+            $this->sendMessage($roomId, "Result: " . (string)$visitor->visit($ast));
         } catch (\Exception $e) {
-            $message->setMessage($e->getMessage());
+            $this->sendMessage($roomId, $e->getMessage());
         }
-
-        $roomApi = new RoomAPI($client);
-        $roomApi->sendRoomNotification($hookData->item->room->id, $message);
     }
 }
