@@ -4,9 +4,10 @@
 /** @var string $botcommand */
 ?>
 
-<strong><?= $botname ?> :: Command List</strong><br>
-
+<strong><?= $botname ?> has the following commands available</strong><br>
 <?php foreach ($commands as $command): ?>
-    <?= $command->getName() ?> - <?= $command->getDescription() ?>
-    <p>/<?= $botcommand ?> <?= $command->getUsage() ?></p>
+    <br>
+    <strong><?= $command->getName() ?> - <?= $command->getDescription() ?></strong><br>
+    Usage: /<?= $botcommand ?> <?= $command->getUsage() ?><br>
+    Aliases: <?= implode(', ', $command->getAliases()) ?><br>
 <?php endforeach ?>
