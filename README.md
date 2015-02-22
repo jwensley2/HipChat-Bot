@@ -11,7 +11,7 @@ The default command is /joebot, but can be changed through configuration
     Rolls a random number between 0 and max
 - [x] /joebot math \<expression\>, aliases /calc  
     Calculates the result of a math expression
-- [ ] /joebot aww  
+- [x] /joebot aww  
     Get an random image from /r/aww
 - [ ] /joebot invite @user
     Invite a user to the current channel
