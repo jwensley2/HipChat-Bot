@@ -1,6 +1,7 @@
 <?php namespace App\Http\Controllers;
 
 use App\HipChat\Commands\Aww;
+use App\HipChat\Commands\Invite;
 use App\HipChat\Commands\Math;
 use App\HipChat\Commands\Roll as RollCommand;
 use App\HipChat\Dispatcher;
@@ -78,6 +79,7 @@ class Hipchat extends Controller
         $dispatcher->registerCommand(new RollCommand($client));
         $dispatcher->registerCommand(new Math($client));
         $dispatcher->registerCommand(new Aww($client));
+        $dispatcher->registerCommand(new Invite($client));
 
         if ($install) {
             $dispatcher->dispatch($event);
