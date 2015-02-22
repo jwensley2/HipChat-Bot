@@ -11,15 +11,15 @@
 |
 */
 
-Route::get('/', 'WelcomeController@index');
+Route::get('/', function () {
+    abort(404);
+});
 
-Route::get('home', 'HomeController@index');
 
 Route::get('addon/capabilities', ['as' => 'capabilities', 'uses' => 'Hipchat@capabilities']);
 Route::post('addon/install', ['as' => 'install', 'uses' => 'Hipchat@install']);
 
 Route::post('addon/command', 'Hipchat@command');
-Route::get('addon/installwebhook', 'Hipchat@installWebhook');
 
 Route::controllers([
     'auth'     => 'Auth\AuthController',

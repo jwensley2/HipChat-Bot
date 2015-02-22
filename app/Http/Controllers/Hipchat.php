@@ -85,9 +85,4 @@ class Hipchat extends Controller
             Log::info("Installation not found || Client ID: {$event->oAuthClientId}");
         }
     }
-
-    public function installWebhook()
-    {
-        $this->hipchat->createWebhook(Installation::find(5));
-    }
 }

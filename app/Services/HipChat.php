@@ -43,7 +43,6 @@ class HipChat
         $token = $install->token;
 
         if ($token->expires->lt(Carbon::now())) {
-            \Log::info('Token Expired');
             $accessToken = $this->getAccessToken($install->oauth_id, $install->oauth_secret);
 
             $expireDate = new Carbon();
@@ -52,8 +51,6 @@ class HipChat
             $token->access_token = $accessToken['access_token'];
             $token->expires = $expireDate;
             $token->save();
-        } else {
-            \Log::info('Token still good');
         }
     }
 }

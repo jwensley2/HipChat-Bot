@@ -98,8 +98,6 @@ class Installer
 
             $roomAPI = new RoomAPI($client);
             $roomAPI->createWebhook($install->room_id, $webhook);
-
-            Log::info($roomAPI->getAllWebhooks($install->room_id));
         }
     }
 }
