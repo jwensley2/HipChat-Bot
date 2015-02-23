@@ -31,6 +31,6 @@ class Invite extends AbstractCommand implements CommandInterface
             $roomAPI->addMember($roomId, $user);
         }
 
-        $this->sendMessage($roomId, 'Invitation(s) send to ' . implode(',', $users));
+        $this->sendMessage($roomId, 'Invitation(s) send to ' . implode(',', $users, 'text'));
     }
 }
