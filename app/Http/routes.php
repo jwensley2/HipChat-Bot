@@ -17,6 +17,7 @@ Route::get('/', function () {
 
 
 Route::get('addon/capabilities', ['as' => 'capabilities', 'uses' => 'Hipchat@capabilities']);
+Route::delete('addon/install/{oAuthId}', ['as' => 'uninstall', 'uses' => 'Hipchat@uninstall']);
 Route::post('addon/install', ['as' => 'install', 'uses' => 'Hipchat@install']);
 
 Route::post('addon/command', 'Hipchat@command');

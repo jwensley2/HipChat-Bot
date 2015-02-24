@@ -9,6 +9,7 @@ use GorkaLaucirica\HipchatAPIv2Client\API\RoomAPI;
 use GorkaLaucirica\HipchatAPIv2Client\Auth\OAuth2;
 use GorkaLaucirica\HipchatAPIv2Client\Client;
 use GorkaLaucirica\HipchatAPIv2Client\Model\Webhook;
+use Illuminate\Http\Exception\HttpResponseException;
 use Log;
 
 class Installer
@@ -52,6 +53,24 @@ class Installer
         $this->createHooks($install);
 
         return $install;
+    }
+
+    public function uninstall($oAuthId)
+    {
+        /** @var Installation $install */
+        $install = Installation::whereOauthId($oAuthId)->first();
+
+        if (!$install) {
+            throw new HttpResponseException(response('Installation not found', 404));
+        }
+
+        $hc = new HipChat();
+        $token = $hc->getAccessToken($install->oauth_id, $install->oauth_secret);
+
+        if (!$token) {
+            $install->token->delete();
+            $install->delete();
+        }
     }
 
     public function saveToken()

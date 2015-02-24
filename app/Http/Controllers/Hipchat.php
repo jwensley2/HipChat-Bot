@@ -60,7 +60,15 @@ class Hipchat extends Controller
         $installer = new Installer($data);
         $installer->install();
 
-        return response()->json([]);
+        return response(null, 200);
+    }
+
+    public function uninstall($oAuthId)
+    {
+        $installer = new Installer(null);
+        $installer->uninstall($oAuthId);
+
+        return response(null, 200);
     }
 
     public function command()

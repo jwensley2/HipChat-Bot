@@ -14,15 +14,19 @@ class HipChat
     {
         $client = new \GuzzleHttp\Client(['base_url' => 'https://api.hipchat.com/v2/']);
 
-        $response = $client->post('oauth/token', [
-            'body' => [
-                'grant_type' => 'client_credentials',
-                'scope'      => 'send_notification admin_room',
-            ],
-            'auth' => [$authId, $authSecret]
-        ]);
+        try {
+            $response = $client->post('oauth/token', [
+                'body' => [
+                    'grant_type' => 'client_credentials',
+                    'scope'      => 'send_notification admin_room',
+                ],
+                'auth' => [$authId, $authSecret]
+            ]);
 
-        return $response->json();
+            return $response->json();
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            return null;
+        }
     }
 
     public function listWebhooks(Installation $install)
