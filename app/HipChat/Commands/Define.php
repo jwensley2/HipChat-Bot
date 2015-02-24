@@ -27,6 +27,12 @@ class Define extends AbstractCommand implements CommandInterface
         $this->sendMessage($roomId, $definition, 'html');
     }
 
+    /**
+     * Get the definition for a term
+     *
+     * @param $term
+     * @return string
+     */
     protected function getDefinition($term)
     {
         $guzzle = new \GuzzleHttp\Client(['base_url' => 'http://api.urbandictionary.com']);
@@ -38,12 +44,16 @@ class Define extends AbstractCommand implements CommandInterface
 
         // Filter out long definitions
         $definitions = array_filter($json['list'], function ($definition) {
-            if (strlen($definition['definition']) < 500) {
+            if (strlen($definition['definition']) < 1000) {
                 return true;
             }
 
             return false;
         });
+
+        if (count($definitions) === 0) {
+            return 'No definitions found';
+        }
 
         // Take the top 2
         $definitions = array_slice($definitions, 0, 2);
