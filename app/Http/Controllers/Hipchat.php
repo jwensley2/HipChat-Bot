@@ -45,7 +45,8 @@ class Hipchat extends Controller
                     'scopes' => ['send_notification', 'admin_room']
                 ],
                 'installable'        => [
-                    'callbackUrl' => \URL::route('install')
+                    'callbackUrl' => \URL::route('install'),
+                    'allowGlobal' => false,
                 ],
             ],
         ];

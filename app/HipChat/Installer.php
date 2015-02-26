@@ -94,7 +94,8 @@ class Installer
         $install = new Installation();
         $install->oauth_id = $this->data->oauthId;
         $install->oauth_secret = $this->data->oauthSecret;
-        $install->room_id = $this->data->roomId;
+        $install->room_id = isset($this->data->roomId) ? $this->data->roomId : null;
+        $install->group_id = isset($this->data->groupId) ? $this->data->groupId : null;
         $install->save();
 
         return $install;
