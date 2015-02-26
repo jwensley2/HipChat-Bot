@@ -13,5 +13,5 @@ The default command is /joebot, but can be changed through configuration
     Calculates the result of a math expression
 - [x] /joebot aww  
     Get an random image from /r/aww
-- [ ] /joebot invite @user
+- [x] /joebot invite @user
     Invite a user to the current channel
