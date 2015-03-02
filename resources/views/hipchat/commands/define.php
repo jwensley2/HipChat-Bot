@@ -5,7 +5,7 @@
     <p>
         <strong>Word:</strong> <?= $definition['word'] ?><br>
         <strong>Definition:</strong> <?= nl2br($definition['definition']) ?><br>
-        <strong>Example:</strong> <?= $definition['example'] ?>
+        <strong>Example:</strong> <?= nl2br($definition['example']) ?>
     </p>
 
     <?php if ($definition !== end($definitions)): ?>
