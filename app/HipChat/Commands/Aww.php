@@ -23,8 +23,9 @@ class Aww extends AbstractCommand implements CommandInterface
     {
         $roomId = $event->item->room->id;
         $post = $this->getRandomPost();
-        
-        $this->sendMessage($roomId, $post['data']['url'], 'text');
+
+        $view = view('hipchat.commands.aww')->with('data', $post['data']);
+        $this->sendMessage($roomId, $view->render(), 'html');
     }
 
     protected function getRandomPost()
