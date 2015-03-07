@@ -55,8 +55,8 @@ class Define extends AbstractCommand implements CommandInterface
             return 'No definitions found';
         }
 
-        // Take the top 2
-        $definitions = array_slice($definitions, 0, 2);
+        // Take the top X
+        $definitions = array_slice($definitions, 0, $this->config['definitions']);
 
         return view('hipchat.commands.define')
             ->with('definitions', $definitions)

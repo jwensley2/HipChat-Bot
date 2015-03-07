@@ -26,12 +26,19 @@ abstract class AbstractCommand implements CommandInterface
     /** @var Client */
     protected $client;
 
+    /** @var array */
+    protected $config;
+
     /**
      * @param Client $client The API client
+     * @param array  $config
      */
-    public function __construct(Client $client)
+    public function __construct(Client $client, $config = [])
     {
         $this->client = $client;
+        $this->config = $config;
+
+        \Log::debug($config);
 
         if ($this->aliases) {
             $this->aliases = array_fill_keys($this->aliases, true);

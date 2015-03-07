@@ -10,8 +10,9 @@ interface CommandInterface
 
     /**
      * @param Client $client The API client
+     * @param array  $config
      */
-    public function __construct(Client $client);
+    public function __construct(Client $client, $config);
 
     /**
      * Get the command, eg. /bot <command>

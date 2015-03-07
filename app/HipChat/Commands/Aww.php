@@ -31,7 +31,11 @@ class Aww extends AbstractCommand implements CommandInterface
     {
         $guzzle = new \GuzzleHttp\Client(['base_url' => 'https://www.reddit.com']);
         $response = $guzzle->get('/r/aww/top/.json', [
-            'query' => ['sort' => 'top', 't' => 'hour', 'limit' => 10]
+            'query' => [
+                'sort'  => $this->config['sort'],
+                't'     => $this->config['timespan'],
+                'limit' => $this->config['limit']
+            ]
         ]);
 
         $json = $response->json();

@@ -89,9 +89,9 @@ class Hipchat extends Controller
 
         $dispatcher->registerCommand(new RollCommand($client));
         $dispatcher->registerCommand(new Math($client));
-        $dispatcher->registerCommand(new Aww($client));
+        $dispatcher->registerCommand(new Aww($client, Config::get('hipchat.commands.aww')));
         $dispatcher->registerCommand(new Invite($client));
-        $dispatcher->registerCommand(new Define($client));
+        $dispatcher->registerCommand(new Define($client, Config::get('hipchat.commands.define')));
         $dispatcher->registerCommand(new Event($client));
 
         if ($install) {
