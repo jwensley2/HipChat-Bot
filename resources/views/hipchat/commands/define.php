@@ -3,7 +3,7 @@
 ?>
 <?php foreach ($definitions as $definition): ?>
     <p>
-        <strong>Word:</strong> <?= $definition['word'] ?><br>
+        <strong>Word:</strong> <a href="<?= $definition['permalink'] ?>"><?= $definition['word'] ?></a><br>
         <strong>Definition:</strong> <?= nl2br($definition['definition']) ?><br>
         <strong>Example:</strong> <?= nl2br($definition['example']) ?>
     </p>
