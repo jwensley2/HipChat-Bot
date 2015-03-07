@@ -7,7 +7,5 @@
 <strong><?= $botname ?> has the following commands available</strong><br>
 <?php foreach ($commands as $command): ?>
     <br>
-    <strong><?= $command->getName() ?> - <?= $command->getDescription() ?></strong><br>
-    Usage: /<?= $botcommand ?> <?= $command->getUsage() ?><br>
-    Aliases: <?= implode(', ', $command->getAliases()) ?><br>
+    <?= view('hipchat.command-help')->with(['prefix' => $botcommand, 'command' => $command]) ?>
 <?php endforeach ?>
