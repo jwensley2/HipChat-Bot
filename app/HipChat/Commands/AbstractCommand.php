@@ -8,7 +8,6 @@
 
 namespace App\HipChat\Commands;
 
-
 use GorkaLaucirica\HipchatAPIv2Client\API\RoomAPI;
 use GorkaLaucirica\HipchatAPIv2Client\Client;
 use GorkaLaucirica\HipchatAPIv2Client\Model\Message;
@@ -26,20 +25,23 @@ abstract class AbstractCommand implements CommandInterface
     /** @var Client */
     protected $client;
 
+    /** @var RoomApi */
+    protected $roomApi;
+
     /** @var array */
     protected $config;
 
     /**
-     * @param Client $client The API client
-     * @param array  $config
+     * @param Client  $client The API client
+     * @param RoomAPI $roomApi
+     * @param array   $config
      */
-    public function __construct(Client $client, $config = [])
+    public function __construct(Client $client, RoomAPI $roomApi, $config = [])
     {
         $this->client = $client;
+        $this->roomApi = $roomApi;
         $this->config = $config;
-
-        \Log::debug($config);
-
+        
         if ($this->aliases) {
             $this->aliases = array_fill_keys($this->aliases, true);
         }
@@ -121,7 +123,6 @@ abstract class AbstractCommand implements CommandInterface
         $message->setMessage($messageText);
         $message->setMessageFormat($format);
 
-        $roomApi = new RoomAPI($this->client);
-        $roomApi->sendRoomNotification($roomId, $message);
+        $this->roomApi->sendRoomNotification($roomId, $message);
     }
 }

@@ -12,6 +12,7 @@ use App\HipChat\Webhooks\Events\RoomMessage;
 use App\Http\Requests;
 use App\Installation;
 use Config;
+use GorkaLaucirica\HipchatAPIv2Client\API\RoomAPI;
 use GorkaLaucirica\HipchatAPIv2Client\Auth\OAuth2;
 use GorkaLaucirica\HipchatAPIv2Client\Client;
 use Log;
@@ -84,15 +85,16 @@ class Hipchat extends Controller
 
         $auth = new OAuth2($install->token->access_token);
         $client = new Client($auth);
+        $roomApi = new RoomAPI($client);
 
-        $dispatcher = new Dispatcher($client, Config::get('hipchat.bot'));
+        $dispatcher = new Dispatcher($client, $roomApi, Config::get('hipchat.bot'));
 
-        $dispatcher->registerCommand(new RollCommand($client));
-        $dispatcher->registerCommand(new Math($client));
-        $dispatcher->registerCommand(new Reddit($client, Config::get('hipchat.commands.reddit')));
-        $dispatcher->registerCommand(new Invite($client));
-        $dispatcher->registerCommand(new Define($client, Config::get('hipchat.commands.define')));
-        $dispatcher->registerCommand(new Event($client));
+        $dispatcher->registerCommand(new RollCommand($client, $roomApi));
+        $dispatcher->registerCommand(new Math($client, $roomApi));
+        $dispatcher->registerCommand(new Reddit($client, $roomApi, Config::get('hipchat.commands.reddit')));
+        $dispatcher->registerCommand(new Invite($client, $roomApi));
+        $dispatcher->registerCommand(new Define($client, $roomApi, Config::get('hipchat.commands.define')));
+        $dispatcher->registerCommand(new Event($client, $roomApi));
 
         if ($install) {
             $dispatcher->dispatch($event);

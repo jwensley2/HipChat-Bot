@@ -3,16 +3,18 @@ namespace App\HipChat\Commands;
 
 use App\HipChat\CommandParser;
 use App\HipChat\Webhooks\Events\RoomMessage;
+use GorkaLaucirica\HipchatAPIv2Client\API\RoomAPI;
 use GorkaLaucirica\HipchatAPIv2Client\Client;
 
 interface CommandInterface
 {
 
     /**
-     * @param Client $client The API client
-     * @param array  $config
+     * @param Client  $client The API client
+     * @param RoomAPI $roomApi
+     * @param array   $config
      */
-    public function __construct(Client $client, $config);
+    public function __construct(Client $client, RoomAPI $roomApi, $config);
 
     /**
      * Get the command, eg. /bot <command>

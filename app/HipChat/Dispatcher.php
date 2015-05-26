@@ -3,6 +3,7 @@ namespace App\HipChat;
 
 
 use App\HipChat\Commands\CommandInterface;
+use App\HipChat\Exceptions\DuplicateCommandException;
 use App\HipChat\Webhooks\Events\RoomMessage;
 use GorkaLaucirica\HipchatAPIv2Client\API\RoomAPI;
 use GorkaLaucirica\HipchatAPIv2Client\Client;
@@ -11,18 +12,23 @@ use GorkaLaucirica\HipchatAPIv2Client\Model\Message;
 class Dispatcher
 {
     /** @var  Client */
-    protected $api;
+    protected $client;
+
+    /** @var  RoomApi */
+    protected $roomApi;
 
     /** @var [] */
     protected $commands = [];
 
     /**
-     * @param Client $api    Hipchat API client
-     * @param array  $config The bot configuration
+     * @param Client  $client  Hipchat API client
+     * @param RoomAPI $roomApi The room api
+     * @param array   $config  The bot configuration
      */
-    public function __construct(Client $api, array $config = [])
+    public function __construct(Client $client, RoomAPI $roomApi, array $config = [])
     {
-        $this->api = $api;
+        $this->client = $client;
+        $this->roomApi = $roomApi;
         $this->config = $config;
     }
 
@@ -41,7 +47,7 @@ class Dispatcher
                 'alias'   => false,
             ];
         } else {
-            throw new \Exception('Duplicate command');
+            throw new DuplicateCommandException('Duplicate command');
         }
 
         // Register the commands aliases, first come first serve
@@ -100,8 +106,6 @@ class Dispatcher
      */
     public function showHelp($roomId)
     {
-        $roomAPI = new RoomAPI($this->api);
-
         $messageHtml = view('hipchat.help')
             ->with([
                 'botname'    => $this->config['name'],
@@ -112,6 +116,6 @@ class Dispatcher
 
         $message = new Message();
         $message->setMessage($messageHtml);
-        $roomAPI->sendRoomNotification($roomId, $message);
+        $this->roomApi->sendRoomNotification($roomId, $message);
     }
 }
