@@ -1,10 +1,10 @@
 <?php namespace App\Http\Controllers;
 
-use App\HipChat\Commands\Aww;
 use App\HipChat\Commands\Define;
 use App\HipChat\Commands\Event;
 use App\HipChat\Commands\Invite;
 use App\HipChat\Commands\Math;
+use App\HipChat\Commands\Reddit;
 use App\HipChat\Commands\Roll as RollCommand;
 use App\HipChat\Dispatcher;
 use App\HipChat\Installer;
@@ -89,7 +89,7 @@ class Hipchat extends Controller
 
         $dispatcher->registerCommand(new RollCommand($client));
         $dispatcher->registerCommand(new Math($client));
-        $dispatcher->registerCommand(new Aww($client, Config::get('hipchat.commands.aww')));
+        $dispatcher->registerCommand(new Reddit($client, Config::get('hipchat.commands.reddit')));
         $dispatcher->registerCommand(new Invite($client));
         $dispatcher->registerCommand(new Define($client, Config::get('hipchat.commands.define')));
         $dispatcher->registerCommand(new Event($client));

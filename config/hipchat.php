@@ -11,7 +11,8 @@ return [
         'define' => [
             'definitions' => 2,
         ],
-        'aww'    => [
+        'reddit' => [
+            'nsfw'     => false, // Show NSFW posts
             'sort'     => 'top', // relevance, new, hot, top, comments
             'timespan' => 'day', // hour, day, week, month, year, all
             'limit'    => 50,
