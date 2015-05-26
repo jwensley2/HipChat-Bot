@@ -85,7 +85,7 @@ class Hipchat extends Controller
         $auth = new OAuth2($install->token->access_token);
         $client = new Client($auth);
 
-        $dispatcher = new Dispatcher($client);
+        $dispatcher = new Dispatcher($client, Config::get('hipchat.bot'));
 
         $dispatcher->registerCommand(new RollCommand($client));
         $dispatcher->registerCommand(new Math($client));

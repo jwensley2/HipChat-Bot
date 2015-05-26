@@ -4,7 +4,6 @@ namespace App\HipChat;
 
 use App\HipChat\Commands\CommandInterface;
 use App\HipChat\Webhooks\Events\RoomMessage;
-use Config;
 use GorkaLaucirica\HipchatAPIv2Client\API\RoomAPI;
 use GorkaLaucirica\HipchatAPIv2Client\Client;
 use GorkaLaucirica\HipchatAPIv2Client\Model\Message;
@@ -17,9 +16,14 @@ class Dispatcher
     /** @var [] */
     protected $commands = [];
 
-    public function __construct($api)
+    /**
+     * @param Client $api    Hipchat API client
+     * @param array  $config The bot configuration
+     */
+    public function __construct(Client $api, array $config = [])
     {
         $this->api = $api;
+        $this->config = $config;
     }
 
     /**
@@ -79,7 +83,7 @@ class Dispatcher
      */
     public function dispatch(RoomMessage $event)
     {
-        $command = new CommandParser(\Config::get('hipchat.bot.command'), $event->item->message->message);
+        $command = new CommandParser($this->config['command'], $event->item->message->message);
         $commands = $this->getRegisteredCommands(true);
 
         if (array_key_exists($command->getCommand(), $commands)) {
@@ -100,8 +104,8 @@ class Dispatcher
 
         $messageHtml = view('hipchat.help')
             ->with([
-                'botname'    => Config::get('hipchat.bot.name'),
-                'botcommand' => Config::get('hipchat.bot.command'),
+                'botname'    => $this->config['name'],
+                'botcommand' => $this->config['command'],
                 'commands'   => $this->getRegisteredCommands(false),
             ])
             ->render();
