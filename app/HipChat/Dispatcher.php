@@ -51,12 +51,14 @@ class Dispatcher
         }
 
         // Register the commands aliases, first come first serve
-        foreach ($command->getAliases() as $alias) {
-            if (!array_key_exists($alias, $this->commands)) {
-                $this->commands[$alias] = [
-                    'command' => $command,
-                    'alias'   => true,
-                ];
+        if (is_array($command->getAliases())) {
+            foreach ($command->getAliases() as $alias) {
+                if (!array_key_exists($alias, $this->commands)) {
+                    $this->commands[$alias] = [
+                        'command' => $command,
+                        'alias'   => true,
+                    ];
+                }
             }
         }
     }
