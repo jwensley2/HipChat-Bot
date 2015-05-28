@@ -10,7 +10,7 @@ class Reddit extends AbstractCommand implements CommandInterface
     protected $name        = 'Reddit';
     protected $description = 'Get a random image from the specified subreddit';
     protected $usage       = '<subreddit>';
-    protected $aliases     = ['/r/reddit'];
+    protected $aliases     = [];
 
     /**
      * Triggers the command
