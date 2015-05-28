@@ -42,11 +42,11 @@ class Message
         $this->message = $data->message;
         $this->date = new \DateTime($data->date);
 
-        if ($data->from) {
+        if (isset($data->from)) {
             $this->from = new User($data->from);
         }
 
-        if ($data->mentions) {
+        if (isset($data->mentions)) {
             $this->mentions = array_map(function ($mention) {
                 return new User($mention);
             }, $data->mentions);

@@ -15,11 +15,11 @@ class Item
 
     public function __construct($data)
     {
-        if ($data->message) {
+        if (isset($data->message)) {
             $this->message = new Message($data->message);
         }
 
-        if ($data->room) {
+        if (isset($data->room)) {
             $this->room = new Room($data->room);
         }
     }
