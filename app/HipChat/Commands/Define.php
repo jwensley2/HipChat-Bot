@@ -1,8 +1,10 @@
 <?php
 namespace App\HipChat\Commands;
 
+use App\HipChat\Api;
 use App\HipChat\CommandParser;
 use App\HipChat\Webhooks\Events\RoomMessage;
+use GuzzleHttp\Client;
 
 class Define extends AbstractCommand implements CommandInterface
 {
@@ -11,6 +13,18 @@ class Define extends AbstractCommand implements CommandInterface
     protected $description = 'Get the definition of a word from Urbandictionary';
     protected $usage       = '<word>';
     protected $aliases     = ['def', 'dictionary'];
+
+    /**
+     * @var Client
+     */
+    protected $guzzleClient;
+
+    public function __construct(Api $api, Client $guzzleClient, $config = [])
+    {
+        $this->guzzleClient = $guzzleClient;
+
+        parent::__construct($api, $config);
+    }
 
     /**
      * Triggers the command

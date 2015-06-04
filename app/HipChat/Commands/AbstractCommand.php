@@ -8,9 +8,7 @@
 
 namespace App\HipChat\Commands;
 
-use GorkaLaucirica\HipchatAPIv2Client\API\RoomAPI;
-use GorkaLaucirica\HipchatAPIv2Client\Client;
-use GorkaLaucirica\HipchatAPIv2Client\Model\Message;
+use App\HipChat\Api;
 
 abstract class AbstractCommand implements CommandInterface
 {
@@ -22,26 +20,18 @@ abstract class AbstractCommand implements CommandInterface
     /** @var array */
     protected $aliases = [];
 
-    /** @var Client */
-    protected $client;
-
-    /** @var RoomApi */
-    protected $roomApi;
-
     /** @var array */
     protected $config;
 
     /**
-     * @param Client  $client The API client
-     * @param RoomAPI $roomApi
-     * @param array   $config
+     * @param Api   $api The API client
+     * @param array $config
      */
-    public function __construct(Client $client, RoomAPI $roomApi, $config = [])
+    public function __construct(Api $api, $config = [])
     {
-        $this->client = $client;
-        $this->roomApi = $roomApi;
+        $this->api = $api;
         $this->config = $config;
-        
+
         if ($this->aliases) {
             $this->aliases = array_fill_keys($this->aliases, true);
         }
@@ -115,14 +105,17 @@ abstract class AbstractCommand implements CommandInterface
     }
 
 
-    public function sendMessage($roomId, $messageText, $format = 'html')
+    /**
+     * Send a message to a room
+     *
+     * @param int    $roomId The id of the room
+     * @param string $body   The message body
+     * @param string $format text or html
+     * @deprecated
+     * @see \App\HipChat\Api::sendMessage
+     */
+    public function sendMessage($roomId, $body, $format = 'html')
     {
-        $format = in_array($format, ['html', 'text']) ? $format : 'html';
-
-        $message = new Message();
-        $message->setMessage($messageText);
-        $message->setMessageFormat($format);
-
-        $this->roomApi->sendRoomNotification($roomId, $message);
+        $this->api->sendMessage($roomId, $body, $format);
     }
 }

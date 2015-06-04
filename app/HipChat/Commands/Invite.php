@@ -3,7 +3,6 @@ namespace App\HipChat\Commands;
 
 use App\HipChat\CommandParser;
 use App\HipChat\Webhooks\Events\RoomMessage;
-use GorkaLaucirica\HipchatAPIv2Client\API\RoomAPI;
 
 class Invite extends AbstractCommand implements CommandInterface
 {
@@ -25,10 +24,8 @@ class Invite extends AbstractCommand implements CommandInterface
         $roomId = $event->item->room->id;
         $users = explode(' ', $command->getMessage());
 
-        $roomAPI = new RoomAPI($this->client);
-
         foreach ($users as $user) {
-            $roomAPI->addMember($roomId, $user);
+            $this->api->getRoomApi()->addMember($roomId, $user);
         }
 
         $this->sendMessage($roomId, 'Invitation(s) send to ' . implode(',', $users, 'text'));

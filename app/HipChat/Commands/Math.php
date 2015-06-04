@@ -3,7 +3,6 @@ namespace App\HipChat\Commands;
 
 use App\HipChat\CommandParser;
 use App\HipChat\Webhooks\Events\RoomMessage;
-use GorkaLaucirica\HipchatAPIv2Client\Client;
 
 class Math extends AbstractCommand implements CommandInterface
 {

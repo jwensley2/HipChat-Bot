@@ -11,24 +11,19 @@ use GorkaLaucirica\HipchatAPIv2Client\Model\Message;
 
 class Dispatcher
 {
-    /** @var  Client */
-    protected $client;
-
-    /** @var  RoomApi */
-    protected $roomApi;
+    /** @var  Api */
+    protected $api;
 
     /** @var [] */
     protected $commands = [];
 
     /**
-     * @param Client  $client  Hipchat API client
-     * @param RoomAPI $roomApi The room api
-     * @param array   $config  The bot configuration
+     * @param Api   $api    Api wrapper
+     * @param array $config The bot configuration
      */
-    public function __construct(Client $client, RoomAPI $roomApi, array $config = [])
+    public function __construct(Api $api, array $config = [])
     {
-        $this->client = $client;
-        $this->roomApi = $roomApi;
+        $this->api = $api;
         $this->config = $config;
     }
 
@@ -116,8 +111,6 @@ class Dispatcher
             ])
             ->render();
 
-        $message = new Message();
-        $message->setMessage($messageHtml);
-        $this->roomApi->sendRoomNotification($roomId, $message);
+        $this->api->sendMessage($roomId, $messageHtml);
     }
 }

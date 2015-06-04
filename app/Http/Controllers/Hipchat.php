@@ -1,5 +1,6 @@
 <?php namespace App\Http\Controllers;
 
+use App\HipChat\Api;
 use App\HipChat\Commands\Define;
 use App\HipChat\Commands\Event;
 use App\HipChat\Commands\Invite;
@@ -86,15 +87,17 @@ class Hipchat extends Controller
         $auth = new OAuth2($install->token->access_token);
         $client = new Client($auth);
         $roomApi = new RoomAPI($client);
+        $api = new Api($client, $roomApi);
+        $guzzle = new \GuzzleHttp\Client();
 
-        $dispatcher = new Dispatcher($client, $roomApi, Config::get('hipchat.bot'));
+        $dispatcher = new Dispatcher($api, Config::get('hipchat.bot'));
 
-        $dispatcher->registerCommand(new RollCommand($client, $roomApi));
-        $dispatcher->registerCommand(new Math($client, $roomApi));
-        $dispatcher->registerCommand(new Reddit($client, $roomApi, Config::get('hipchat.commands.reddit')));
-        $dispatcher->registerCommand(new Invite($client, $roomApi));
-        $dispatcher->registerCommand(new Define($client, $roomApi, Config::get('hipchat.commands.define')));
-        $dispatcher->registerCommand(new Event($client, $roomApi));
+        $dispatcher->registerCommand(new RollCommand($api));
+        $dispatcher->registerCommand(new Math($api));
+        $dispatcher->registerCommand(new Reddit($api, $guzzle, Config::get('hipchat.commands.reddit')));
+        $dispatcher->registerCommand(new Invite($api));
+        $dispatcher->registerCommand(new Define($api, $guzzle, Config::get('hipchat.commands.define')));
+        $dispatcher->registerCommand(new Event($api));
 
         if ($install) {
             $dispatcher->dispatch($event);

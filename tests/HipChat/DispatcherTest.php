@@ -4,6 +4,7 @@ namespace Tests\HipChat;
 use App\HipChat\Commands\CommandInterface;
 use App\HipChat\Dispatcher;
 use App\HipChat\Webhooks\Events\RoomMessage;
+use GuzzleHttp\Client;
 use Tests\HipChatTestCase;
 
 class DispatcherTest extends HipChatTestCase
@@ -11,12 +12,20 @@ class DispatcherTest extends HipChatTestCase
 
     public function testRegisterCommand()
     {
-        $client = $this->getClientMock();
-        $roomApi = $this->getRoomApiMock($client);
-        $dispatcher = new Dispatcher($client, $roomApi);
+        $dispatcher = new Dispatcher($this->getApiMock());
 
-        $dispatcher->registerCommand($this->getCommandMock('\App\HipChat\Commands\Reddit')); // 0 aliases
-        $dispatcher->registerCommand($this->getCommandMock('\App\HipChat\Commands\Define')); // 2 aliases
+        $redditCommand = $this->getMockBuilder('\App\HipChat\Commands\Reddit')
+            ->setConstructorArgs([$this->getApiMock(), new Client()])
+            ->setMethods(null)
+            ->getMock();
+
+        $defineCommand = $this->getMockBuilder('\App\HipChat\Commands\Define')
+            ->setConstructorArgs([$this->getApiMock(), new Client()])
+            ->setMethods(null)
+            ->getMock();
+
+        $dispatcher->registerCommand($redditCommand); // 0 aliases
+        $dispatcher->registerCommand($defineCommand); // 2 aliases
 
         $commands = $dispatcher->getRegisteredCommands(false);
         $this->assertInternalType('array', $commands);
@@ -34,12 +43,15 @@ class DispatcherTest extends HipChatTestCase
      */
     public function testDuplicateCommand()
     {
-        $client = $this->getClientMock();
-        $roomApi = $this->getRoomApiMock($client);
-        $dispatcher = new Dispatcher($client, $roomApi);
+        $dispatcher = new Dispatcher($this->getApiMock());
 
-        $dispatcher->registerCommand($this->getCommandMock('\App\HipChat\Commands\Reddit'));
-        $dispatcher->registerCommand($this->getCommandMock('\App\HipChat\Commands\Reddit'));
+        $redditCommand = $this->getMockBuilder('\App\HipChat\Commands\Reddit')
+            ->setConstructorArgs([$this->getApiMock(), new Client()])
+            ->setMethods(null)
+            ->getMock();
+
+        $dispatcher->registerCommand($redditCommand);
+        $dispatcher->registerCommand($redditCommand);
 
     }
 
@@ -53,9 +65,7 @@ class DispatcherTest extends HipChatTestCase
      */
     public function testDispatch(RoomMessage $message, $command)
     {
-        $client = $this->getClientMock();
-        $roomApi = $this->getRoomApiMock($client);
-        $dispatcher = new Dispatcher($client, $roomApi, ['command' => 'jb', 'name' => 'JoeBot']);
+        $dispatcher = new Dispatcher($this->getApiMock(), ['command' => 'jb', 'name' => 'JoeBot']);
 
         $command->expects($this->once())
             ->method('trigger');
@@ -66,6 +76,16 @@ class DispatcherTest extends HipChatTestCase
 
     public function dispatchProvider()
     {
+        $redditCommand = $this->getMockBuilder('\App\HipChat\Commands\Reddit')
+            ->setConstructorArgs([$this->getApiMock(), new Client()])
+            ->setMethods(['trigger'])
+            ->getMock();
+
+        $defineCommand = $this->getMockBuilder('\App\HipChat\Commands\Define')
+            ->setConstructorArgs([$this->getApiMock(), new Client()])
+            ->setMethods(['trigger'])
+            ->getMock();
+
         return [
             [
                 new RoomMessage((object)[
@@ -90,7 +110,7 @@ class DispatcherTest extends HipChatTestCase
                     'oauth_client_id' => 1,
                     'webhook_id'      => 1,
                 ]),
-                $this->getCommandMock('\App\HipChat\Commands\Define', ['trigger'])
+                $defineCommand
             ],
             [
                 new RoomMessage((object)[
@@ -115,7 +135,7 @@ class DispatcherTest extends HipChatTestCase
                     'oauth_client_id' => 1,
                     'webhook_id'      => 1,
                 ]),
-                $this->getCommandMock('\App\HipChat\Commands\Reddit', ['trigger'])
+                $redditCommand
             ]
         ];
     }

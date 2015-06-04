@@ -1,8 +1,10 @@
 <?php
 namespace App\HipChat\Commands;
 
+use App\HipChat\Api;
 use App\HipChat\CommandParser;
 use App\HipChat\Webhooks\Events\RoomMessage;
+use GuzzleHttp\Client;
 
 class Reddit extends AbstractCommand implements CommandInterface
 {
@@ -11,6 +13,18 @@ class Reddit extends AbstractCommand implements CommandInterface
     protected $description = 'Get a random image from the specified subreddit';
     protected $usage       = '<subreddit>';
     protected $aliases     = [];
+
+    /**
+     * @var Client
+     */
+    protected $guzzleClient;
+
+    public function __construct(Api $api, Client $guzzleClient, $config = [])
+    {
+        $this->guzzleClient = $guzzleClient;
+
+        parent::__construct($api, $config);
+    }
 
     /**
      * Triggers the command
@@ -44,13 +58,13 @@ class Reddit extends AbstractCommand implements CommandInterface
      */
     protected function getRandomPost($subreddit)
     {
-        $guzzle = new \GuzzleHttp\Client(['base_url' => 'https://www.reddit.com']);
-        $response = $guzzle->get("/r/{$subreddit}/top/.json", [
-            'query' => [
+        $response = $this->guzzleClient->get("/r/{$subreddit}/top/.json", [
+            'base_url' => 'https://www.reddit.com',
+            'query'    => [
                 'sort'  => $this->config['sort'],
                 't'     => $this->config['timespan'],
                 'limit' => $this->config['limit']
-            ]
+            ],
         ]);
 
         $json = $response->json();

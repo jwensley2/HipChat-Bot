@@ -8,14 +8,6 @@ use GorkaLaucirica\HipchatAPIv2Client\Client;
 
 interface CommandInterface
 {
-
-    /**
-     * @param Client  $client The API client
-     * @param RoomAPI $roomApi
-     * @param array   $config
-     */
-    public function __construct(Client $client, RoomAPI $roomApi, $config);
-
     /**
      * Get the command, eg. /bot <command>
      *
