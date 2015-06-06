@@ -5,9 +5,12 @@ use App\HipChat\Api;
 use App\HipChat\CommandParser;
 use App\HipChat\Webhooks\Events\RoomMessage;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 
 class Reddit extends AbstractCommand implements CommandInterface
 {
+    const REDDIT_URL = 'https://www.reddit.com';
+
     protected $command     = 'reddit';
     protected $name        = 'Reddit';
     protected $description = 'Get a random image from the specified subreddit';
@@ -44,10 +47,24 @@ class Reddit extends AbstractCommand implements CommandInterface
             return;
         }
 
-        $post = $this->getRandomPost($subreddit);
+        try {
+            $post = $this->getRandomPost($subreddit);
+        } catch (ClientException $e) {
+            if ($e->getCode() === 404) {
+                $this->api->sendMessage($roomId, "{$subreddit} is not a valid subreddit", 'text');
 
-        $view = view('hipchat.commands.reddit')->with('data', $post['data']);
-        $this->sendMessage($roomId, $view->render(), 'html');
+                return;
+            }
+
+            throw $e;
+        }
+
+        if (is_null($post)) {
+            $this->api->sendMessage($roomId, 'No posts were retrieved', 'text');
+        } else {
+            $view = view('hipchat.commands.reddit')->with('data', $post['data']);
+            $this->api->sendMessage($roomId, $view->render(), 'html');
+        }
     }
 
     /**
@@ -58,12 +75,14 @@ class Reddit extends AbstractCommand implements CommandInterface
      */
     protected function getRandomPost($subreddit)
     {
-        $response = $this->guzzleClient->get("/r/{$subreddit}/top/.json", [
-            'base_url' => 'https://www.reddit.com',
-            'query'    => [
-                'sort'  => $this->config['sort'],
-                't'     => $this->config['timespan'],
-                'limit' => $this->config['limit']
+        $defaultParams = ['sort' => 'top', 'timespan' => 'day', 'limit' => 50];
+        $params = array_merge($defaultParams, $this->config);
+
+        $response = $this->guzzleClient->get(self::REDDIT_URL . "/r/{$subreddit}/top/.json", [
+            'query' => [
+                'sort'  => $params['sort'],
+                't'     => $params['timespan'],
+                'limit' => $params['limit']
             ],
         ]);
 
@@ -72,12 +91,26 @@ class Reddit extends AbstractCommand implements CommandInterface
         $posts = $json['data']['children'];
 
         if (!$this->config['nsfw']) {
-            // Filter out NSFW posts
-            $posts = array_filter($posts, function ($post) {
-                return !$post['data']['over_18'];
-            });
+            $posts = $this->filterNSFWPosts($posts);
         }
 
-        return $posts[mt_rand(0, count($posts) - 1)];
+        if (is_array($posts) && count($posts) > 0) {
+            return $posts[mt_rand(0, count($posts) - 1)];
+        }
+
+        return null;
+    }
+
+    /**
+     * Filter out NSFW posts
+     *
+     * @param array $posts
+     * @return array
+     */
+    protected function filterNSFWPosts(array $posts)
+    {
+        return array_values(array_filter($posts, function ($post) {
+            return !$post['data']['over_18'];
+        }));
     }
 }
