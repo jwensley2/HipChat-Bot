@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/jwensley2/HipChat-Bot.svg?branch=master)](https://travis-ci.org/jwensley2/HipChat-Bot)
+[![Code Climate](https://codeclimate.com/github/jwensley2/HipChat-Bot/badges/gpa.svg)](https://codeclimate.com/github/jwensley2/HipChat-Bot)
+[![Test Coverage](https://codeclimate.com/github/jwensley2/HipChat-Bot/badges/coverage.svg)](https://codeclimate.com/github/jwensley2/HipChat-Bot/coverage)
 
 # HipChat Bot
 
