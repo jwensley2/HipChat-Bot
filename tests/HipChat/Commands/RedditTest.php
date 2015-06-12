@@ -12,10 +12,10 @@ class RedditTest extends HipChatTestCase
      * Test the trigger method
      *
      * @dataProvider triggerTestProvider
-     * @param string $message          The webhook message
-     * @param array  $posts            The reddit posts
-     * @param array  $config
-     * @param bool   $displayablePosts Whether posts array should contain posts that can be displayed
+     * @param RoomMessage $message          The webhook message
+     * @param array       $posts            The reddit posts
+     * @param array       $config
+     * @param bool        $displayablePosts Whether posts array should contain posts that can be displayed
      */
     public function testTrigger($message, $posts, $config, $displayablePosts)
     {
@@ -30,6 +30,7 @@ class RedditTest extends HipChatTestCase
                 'data' => ['children' => $posts]
             ]);
 
+        /** @var \GuzzleHttp\Client|\PHPUnit_Framework_MockObject_MockObject $clientMock */
         $clientMock = $this->getMockBuilder('\GuzzleHttp\Client')
             ->setMethods(['get'])
             ->getMock();
@@ -137,7 +138,7 @@ class RedditTest extends HipChatTestCase
                 ],
                 'score'                  => $faker->numberBetween(-1000, 1000),
                 'approved_by'            => null,
-                'over_18'                => ($nsfw) ? $nsfw : $faker->boolean(),
+                'over_18'                => !is_null($nsfw) ? $nsfw : $faker->boolean(),
                 'hidden'                 => false,
                 'num_comments'           => $faker->numberBetween(0, 1000),
                 'thumbnail'              => '',
