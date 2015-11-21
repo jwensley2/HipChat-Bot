@@ -82,6 +82,7 @@ class Installer
         $expireDate->addSeconds($accessToken['expires_in']);
 
         $token = new Token();
+        $token->service = 'hipchat';
         $token->access_token = $accessToken['access_token'];
         $token->expires = $expireDate;
         $token->save();
